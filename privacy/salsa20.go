@@ -19,17 +19,17 @@ const (
 	salsa20Code = 0x1236
 )
 
-func (salsa *saLsa20) Compress(src []byte, key []byte, out []byte) error {
+func (salsa *saLsa20) Compress(src []byte, key []byte, out []byte) (int, error) {
 	if len(key) != 32 || len(src) == 0 {
-		return errors.New("parameter is invalid")
+		return 0, errors.New("parameter is invalid")
 	}
 
 	salsa20.XORKeyStream(out, src, salsa.iv, (*[32]byte)(key))
 
-	return nil
+	return len(src), nil
 }
 
-func (salsa *saLsa20) Uncompress(src []byte, key []byte, out []byte) error {
+func (salsa *saLsa20) Uncompress(src []byte, key []byte, out []byte) (int, error) {
 	return salsa.Compress(src, key, out)
 }
 

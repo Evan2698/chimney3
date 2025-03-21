@@ -17,13 +17,13 @@ const (
 	rawCode = 0x1237
 )
 
-func (raw *rawMethod) Compress(src []byte, key []byte, out []byte) error {
+func (raw *rawMethod) Compress(src []byte, key []byte, out []byte) (int, error) {
 	defer utils.Trace("Compress")()
 	copy(out, src)
-	return nil
+	return len(src), nil
 }
 
-func (raw *rawMethod) Uncompress(src []byte, key []byte, out []byte) error {
+func (raw *rawMethod) Uncompress(src []byte, key []byte, out []byte) (int, error) {
 	return raw.Compress(src, key, out)
 }
 

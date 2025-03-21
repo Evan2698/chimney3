@@ -18,24 +18,24 @@ const (
 	chacha20Code = 0x1235
 )
 
-func (chacha *cha20) Compress(src []byte, key []byte, out []byte) error {
+func (chacha *cha20) Compress(src []byte, key []byte, out []byte) (int, error) {
 
 	if len(key) != 32 || len(src) == 0 {
-		return errors.New("parameter is invalid")
+		return 0, errors.New("parameter is invalid")
 	}
 
 	a, err := chacha20.NewXChaCha(key, chacha.iv)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	a.XORKeyStream(out, src)
 
-	return nil
+	return len(src), nil
 
 }
 
-func (chacha *cha20) Uncompress(src []byte, key []byte, out []byte) error {
+func (chacha *cha20) Uncompress(src []byte, key []byte, out []byte) (int, error) {
 	return chacha.Compress(src, key, out)
 }
 
