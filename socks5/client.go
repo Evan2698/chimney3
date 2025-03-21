@@ -13,17 +13,6 @@ import (
 	"strconv"
 )
 
-const (
-	socks5Version          uint8 = 0x5
-	socks5NoAuth           uint8 = 0x0
-	socks5AuthWithUserPass uint8 = 0x2
-)
-const (
-	socks5CMDConnect uint8 = 0x1
-	socks5CMDBind    uint8 = 0x2
-	socks5CMDUDP     uint8 = 0x3
-)
-
 type ClientSettings struct {
 	Server     string
 	ServerPort int
@@ -164,13 +153,14 @@ func (c *Socks5) authenticateUser(con io.ReadWriteCloser, key []byte) error {
 		return err
 	}
 
-	usrlen := len(usrsha1)
+	usr := []byte(c.Settings.User)
+	userLen := len(usr)
 
 	var out bytes.Buffer
 	out.WriteByte(socks5Version)
 	out.WriteByte(socks5AuthWithUserPass)
-	out.WriteByte(byte(usrlen))
-	out.Write(usrsha1)
+	out.WriteByte(byte(userLen))
+	out.Write(usr)
 	out.WriteByte(byte(n))
 	out.Write(tmpOutBuffer[:n])
 
