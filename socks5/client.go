@@ -10,16 +10,12 @@ import (
 	"io"
 	"log"
 	"net"
-	"strconv"
 )
 
 type ClientSettings struct {
-	Server     string
-	ServerPort int
-	Local      string
-	LocalPort  int
-	User       string
-	PassWord   string
+	ProxyAddress string
+	User         string
+	PassWord     string
 }
 
 type Socks5 struct {
@@ -239,11 +235,10 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 }
 
 func (c *Socks5) buildClientSocket() (con net.Conn, err error) {
-	host := net.JoinHostPort(c.Settings.Server, strconv.Itoa(c.Settings.ServerPort))
+	host := c.Settings.ProxyAddress
 	if c.Protect != nil {
 		con, err = core.CreateSocket(host, core.TCP_SOCKET, c.Protect)
 	} else {
-
 		con, err = net.Dial("tcp", host)
 	}
 

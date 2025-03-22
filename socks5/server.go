@@ -10,7 +10,6 @@ import (
 	"errors"
 	"log"
 	"net"
-	"strconv"
 	"sync"
 )
 
@@ -20,19 +19,14 @@ type Socks5Server interface {
 }
 
 type Socks5ServerSettings struct {
-	Server     string
-	ServerPort int
-	IsLocal    bool
-	PassWord   string
-	Which      string
-	Local      string
-	LocalPort  int
-	User       string
+	ListenAddress string
+	User          string
+	PassWord      string
+	ProxyAddress  string
+	Which         string
 }
 
 type Socks5S struct {
-	Key      []byte
-	I        privacy.EncryptThings
 	Settings *Socks5ServerSettings
 	Exit     bool
 	Protect  mobile.ProtectSocket
@@ -41,6 +35,8 @@ type Socks5S struct {
 type socks5session struct {
 	Conn             net.Conn
 	AuthenticateUser bool
+	Key              []byte
+	I                privacy.EncryptThings
 }
 
 func (session *socks5session) Close() {
@@ -50,7 +46,7 @@ func (session *socks5session) Close() {
 
 func (s *Socks5S) Serve() error {
 
-	host := net.JoinHostPort(s.Settings.Server, strconv.Itoa(s.Settings.ServerPort))
+	host := s.Settings.ListenAddress
 	// to TCP
 	log.Println("server run on " + host + " with tcp protocol.")
 	l, err := net.Listen("tcp", host)
@@ -58,8 +54,12 @@ func (s *Socks5S) Serve() error {
 		log.Println("listen failed ", err)
 		return err
 	}
+	defer func() {
+		l.Close()
+	}()
 
-	defer l.Close()
+	i := privacy.NewMethodWithName(s.Settings.Which)
+	key := privacy.MakeCompressKey(s.Settings.PassWord)
 
 	for {
 		con, err := l.Accept()
@@ -74,6 +74,8 @@ func (s *Socks5S) Serve() error {
 		session := &socks5session{
 			Conn:             con,
 			AuthenticateUser: false,
+			I:                i,
+			Key:              key,
 		}
 
 		go s.serveOn(session)
@@ -184,7 +186,7 @@ func (s *Socks5S) echoHello(session *socks5session) error {
 		session.AuthenticateUser = true
 		var out bytes.Buffer
 		out.Write([]byte{socks5Version, socks5AuthWithUserPass})
-		ii := s.I.ToBytes()
+		ii := session.I.ToBytes()
 		out.WriteByte(byte(len(ii)))
 		out.Write(ii)
 		_, err = con.Write(out.Bytes())
@@ -193,7 +195,7 @@ func (s *Socks5S) echoHello(session *socks5session) error {
 			return err
 		}
 
-		err = s.authUser(con)
+		err = s.authUser(session)
 		if err != nil {
 			log.Println("verify user failed", err)
 			return err
@@ -206,7 +208,9 @@ func (s *Socks5S) echoHello(session *socks5session) error {
 	return errors.New("not implement for other method")
 }
 
-func (s *Socks5S) authUser(con net.Conn) error {
+func (s *Socks5S) authUser(session *socks5session) error {
+
+	con := session.Conn
 	tmpBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpBuffer)
@@ -230,12 +234,12 @@ func (s *Socks5S) authUser(con net.Conn) error {
 	userName := string(usr)
 
 	pass := tmpBuffer[3+userLen+1 : n]
-	sha1 := privacy.BuildMacHash(s.Key, userName)
+	sha1 := privacy.BuildMacHash(session.Key, userName)
 	tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpOutBuffer)
 	}()
-	n, err = s.I.Uncompress(pass, s.Key, tmpOutBuffer)
+	n, err = session.I.Uncompress(pass, session.Key, tmpOutBuffer)
 	if err != nil {
 		log.Println("uncompress user name failed", err)
 		return err
@@ -292,7 +296,7 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			return nil, errors.New("address length is incorrect")
 		}
 
-		n, err = s.I.Uncompress(text, s.Key, tmpBuffer)
+		n, err = session.I.Uncompress(text, session.Key, tmpBuffer)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("command is not connection command")
@@ -314,7 +318,7 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 		}
 
 		ra, _ := core.ParseTargetAddress(remote.RemoteAddr().String())
-		n, err = s.I.Compress(ra.Bytes(), s.Key, tmpBuffer)
+		n, err = session.I.Compress(ra.Bytes(), session.Key, tmpBuffer)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("remote address compress failed", err)
@@ -362,12 +366,9 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 
 func (s *Socks5S) buildTcpSocketWithSocks5Address(addr *core.Socks5Address) (conn core.SocksStream, err error) {
 	cc := &ClientSettings{
-		Server:     s.Settings.Server,
-		ServerPort: s.Settings.ServerPort,
-		Local:      s.Settings.Local,
-		LocalPort:  s.Settings.LocalPort,
-		User:       s.Settings.User,
-		PassWord:   s.Settings.PassWord,
+		ProxyAddress: s.Settings.ProxyAddress,
+		User:         s.Settings.User,
+		PassWord:     s.Settings.PassWord,
 	}
 	client := NewSocks5Client(cc, s.Protect)
 	conn, err = client.Dial(addr)
