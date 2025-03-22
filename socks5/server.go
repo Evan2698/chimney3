@@ -23,7 +23,7 @@ type Socks5ServerSettings struct {
 	User          string
 	PassWord      string
 	ProxyAddress  string
-	Which         string
+	Method        string
 }
 
 type Socks5S struct {
@@ -37,6 +37,14 @@ type socks5session struct {
 	AuthenticateUser bool
 	Key              []byte
 	I                privacy.EncryptThings
+}
+
+func NewSocks5Server(s *Socks5ServerSettings, p mobile.ProtectSocket) Socks5Server {
+	return &Socks5S{
+		Settings: s,
+		Exit:     false,
+		Protect:  p,
+	}
 }
 
 func (session *socks5session) Close() {
@@ -58,7 +66,7 @@ func (s *Socks5S) Serve() error {
 		l.Close()
 	}()
 
-	i := privacy.NewMethodWithName(s.Settings.Which)
+	i := privacy.NewMethodWithName(s.Settings.Method)
 	key := privacy.MakeCompressKey(s.Settings.PassWord)
 
 	for {
@@ -82,6 +90,10 @@ func (s *Socks5S) Serve() error {
 	}
 
 	return err
+}
+
+func (s *Socks5S) Stop() {
+	s.Exit = true
 }
 
 func (s *Socks5S) serveOn(session *socks5session) {

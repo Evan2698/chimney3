@@ -15,7 +15,7 @@ type saLsa20 struct {
 }
 
 const (
-	salsa20name = "salsa-20"
+	salsa20name = "SALSA-20"
 	salsa20Code = 0x1236
 )
 

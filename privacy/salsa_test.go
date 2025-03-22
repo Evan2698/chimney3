@@ -6,10 +6,10 @@ import (
 )
 
 func TestXxx(t *testing.T) {
-	I := NewMethodWithName("salsa-20")
+	I := NewMethodWithName("SALSA-20")
 	nonce := I.MakeSalt()
 	I.SetIV(nonce)
-	key := MakeCompressKey("salsa-20")
+	key := MakeCompressKey("SALSA-20")
 	buffer := mem.NewApplicationBuffer()
 	small := buffer.GetSmall()
 	I.Compress([]byte("hello"), key, small)

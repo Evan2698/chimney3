@@ -1,8 +1,39 @@
 package main
 
-import "fmt"
+import (
+	"chimney3/settings"
+	"chimney3/socks5"
+	"chimney3/utils"
+	"flag"
+	"fmt"
+	"os"
+	"runtime"
+)
+
+var (
+	isServer *bool
+)
 
 func main() {
 
-	fmt.Println("hello world!!!")
+	cpu := runtime.NumCPU()
+	runtime.GOMAXPROCS(cpu * 4)
+
+	dir, _ := utils.RetrieveExePath()
+	jsonPath := dir + "/setting.json"
+	if (len(jsonPath)) == 0 {
+		fmt.Println("config file path is incorrect!!", jsonPath)
+		os.Exit(1)
+	}
+
+	settings, err := settings.Parse(jsonPath)
+	if err != nil {
+		fmt.Println("load config file failed!", err)
+		os.Exit(1)
+	}
+
+	isServer = flag.Bool("s", false, "a bool")
+	flag.Parse()
+
+	socks5.RunServer(settings, *isServer)
 }
