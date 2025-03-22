@@ -4,6 +4,7 @@ const (
 	socks5Version          uint8 = 0x5
 	socks5NoAuth           uint8 = 0x0
 	socks5AuthWithUserPass uint8 = 0x2
+	socks5ReplySuccess     uint8 = 0x0
 )
 const (
 	socks5CMDConnect uint8 = 0x1
@@ -12,5 +13,6 @@ const (
 )
 
 const (
-	MAX_TIME_OUT uint32 = 600
+	MAX_TIME_OUT  uint32 = 600
+	BUFFER_OFFSET int    = 16
 )

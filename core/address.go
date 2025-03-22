@@ -107,3 +107,23 @@ func (addr *Socks5Address) Parse(data []byte) error {
 	addr.Valid = true
 	return nil
 }
+func ParseTargetAddress(host string) (*Socks5Address, error) {
+	s, p, err := net.SplitHostPort(host)
+	if err != nil {
+		return nil, err
+	}
+	np, _ := strconv.Atoi(p)
+	v := &Socks5Address{}
+
+	ip := net.ParseIP(s)
+	if ip == nil {
+		v.SetDomainAddress(s, uint16(np))
+	} else {
+		if ip.To4() == nil {
+			v.SetIPv6Address(ip, uint16(np))
+		} else {
+			v.SetIPv4Address(ip, uint16(np))
+		}
+	}
+	return v, nil
+}

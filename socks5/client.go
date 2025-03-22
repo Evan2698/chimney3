@@ -198,6 +198,7 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 		log.Println("compress address failed", err)
 		return nil, err
 	}
+	op.WriteByte(byte(n))
 	op.Write(tmpBuffer[:n])
 
 	if _, err = con.Write(op.Bytes()); err != nil {
@@ -216,7 +217,7 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 		return nil, err
 	}
 
-	response := tmpBuffer[4:n]
+	response := tmpBuffer[5:n]
 	tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpOutBuffer)
