@@ -22,6 +22,8 @@ type Settings struct {
 		Password string `json:"password"`
 		Udpport  int    `json:"udpport"`
 	} `json:"client"`
+
+	Which string `json:"which"`
 }
 
 func Parse(path string) (config *Settings, err error) {

@@ -7,6 +7,7 @@ import (
 	"chimney3/privacy"
 	"crypto/sha1"
 	"errors"
+	"io"
 	"log"
 	"net"
 	"sync"
@@ -16,7 +17,7 @@ import (
 	"github.com/xtaci/kcp-go/v5"
 )
 
-func RunkcpServer(s *KCPSetting) error {
+func runkcpServerImp(s *KCPSetting) error {
 	key := pbkdf2.Key(privacy.MakeCompressKey(s.Password), []byte(s.User), 1024, 32, sha1.New)
 	block, _ := kcp.NewSalsa20BlockCrypt(key)
 	listener, err := kcp.ListenWithOptions(s.ListenAddress, block, 10, 3)
@@ -58,58 +59,18 @@ func serverOn(s *kcpSession) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go copy2(s.S, dst, &wg)
-	go copy2_(s.S, dst, &wg)
+	go copy2tt(s.S, dst, &wg)
 	wg.Wait()
 
 }
 
-func copy2_(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(" fatal error on proxy: ", err)
-		}
-	}()
-
-	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
-	defer func() {
-		mem.NewApplicationBuffer().PutLarge(tmpBuffer)
-	}()
-	for {
-		n, err := s.Read(tmpBuffer)
-		if err != nil {
-			break
-		}
-		_, err = d.Write(tmpBuffer[:n])
-		if err != nil {
-			break
-		}
-	}
-
+func copy2tt(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
+	io.Copy(d, s)
 	wg.Done()
 }
 
 func copy2(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(" fatal error on proxy: ", err)
-		}
-	}()
-
-	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
-	defer func() {
-		mem.NewApplicationBuffer().PutLarge(tmpBuffer)
-	}()
-	for {
-		n, err := s.Read(tmpBuffer)
-		if err != nil {
-			break
-		}
-		_, err = d.Write(tmpBuffer[:n])
-		if err != nil {
-			break
-		}
-	}
-
+	io.Copy(d, s)
 	wg.Done()
 }
 

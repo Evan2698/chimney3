@@ -1,17 +1,20 @@
 {
 	"server": {
 		"ip": "127.0.0.1",
-		"port": 9384,
+		"port": 9001,
 		"user": "where",
 		"password": "Evan$%#@!#$@!123",
 		"method": "SALSA-20",
 		"udpport": 45
+
 	},
 	"client": {
 		"ip": "127.0.0.1",
-		"port": 9384,
+		"port": 9002,
 		"user": "where",
 		"password": "Evan$%#@!#$@!123",
 		"udpport": 59
-	}
+	
+	},
+	"which": "kcp"
 }

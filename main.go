@@ -1,8 +1,8 @@
 package main
 
 import (
+	"chimney3/all"
 	"chimney3/settings"
-	"chimney3/socks5"
 	"chimney3/utils"
 	"flag"
 	"fmt"
@@ -35,5 +35,5 @@ func main() {
 	isServer = flag.Bool("s", false, "a bool")
 	flag.Parse()
 
-	socks5.RunServer(settings, *isServer)
+	all.Reactor(settings, *isServer)
 }
