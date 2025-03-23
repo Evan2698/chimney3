@@ -101,23 +101,7 @@ func (c *Socks5) authenticateUser(con io.ReadWriteCloser, key []byte) error {
 		log.Println("hello response read failed: ", err)
 		return err
 	}
-
-	if n < 2 {
-		log.Println("server protocol format is incorrect : ", tmpBuffer[:n])
-		return errors.New("server protocol format is incorrect")
-	}
-
-	if tmpBuffer[0] != socks5Version {
-		log.Print("socks5 protocol format is incorrect", tmpBuffer[0])
-		return errors.New("no detect socks5 flag")
-	}
-
-	if socks5AuthWithUserPass != tmpBuffer[1] {
-		log.Println("method is not auth", tmpBuffer[1])
-		return errors.New("no auth flag")
-	}
-
-	if n < 5 {
+	if n < 3 || (!bytes.Equal([]byte{socks5Version, socks5AuthWithUserPass}, tmpBuffer[:2])) {
 		log.Println("custom protocol is incorrect!! ", tmpBuffer[:n])
 		return errors.New("custom protocol is incorrect")
 	}

@@ -7,7 +7,6 @@ import (
 	"chimney3/privacy"
 	"crypto/sha1"
 	"errors"
-	"io"
 	"log"
 	"net"
 	"sync"
@@ -65,12 +64,55 @@ func serverOn(s *kcpSession) {
 }
 
 func copy2tt(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
-	io.Copy(d, s)
+	//io.Copy(d, s)
+
+	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
+	defer func(b []byte) {
+		mem.NewApplicationBuffer().PutLarge(b)
+
+	}(tmpBuffer)
+
+	for {
+		n, err := s.Read(tmpBuffer)
+		if err != nil {
+			log.Println("web to kcp", err)
+			break
+		}
+		log.Println("8, ", tmpBuffer[:n])
+
+		_, err = d.Write(tmpBuffer[:n])
+		if err != nil {
+			log.Println("web to kcp2", err)
+			break
+		}
+	}
+
 	wg.Done()
 }
 
 func copy2(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
-	io.Copy(d, s)
+	//io.Copy(d, s)
+
+	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
+	defer func(b []byte) {
+		mem.NewApplicationBuffer().PutLarge(b)
+
+	}(tmpBuffer)
+
+	for {
+		n, err := s.Read(tmpBuffer)
+		if err != nil {
+			log.Println("web to kcp3", err)
+			break
+		}
+		log.Println("7, ", tmpBuffer[:n])
+
+		_, err = d.Write(tmpBuffer[:n])
+		if err != nil {
+			log.Println("web to kcp4", err)
+			break
+		}
+	}
 	wg.Done()
 }
 
@@ -84,44 +126,31 @@ func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if n < 3 {
-		return nil, errors.New("length is incorrect")
+	if n != 3 || !bytes.Equal(tmpBuffer[:3], []byte{0x5, 0x1, 0x0}) {
+		s.Write([]byte{0x5, 0xA})
+		return nil, errors.New("it is not socks5 protocol")
 	}
 
-	if tmpBuffer[0] != 0x5 || tmpBuffer[1] != 0 {
-		return nil, errors.New("protocol is incorrect")
-	}
 	_, err = s.Write([]byte{0x5, 0x0})
 	if err != nil {
+		log.Println("write socks5 response failed", err)
 		return nil, err
 	}
 
 	//2. parse the connect command
 	n, err = s.Read(tmpBuffer)
 	if err != nil {
-		s.Write([]byte{0x05, 0x0A, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 		log.Println("read connect command failed", err)
 		return nil, err
 	}
 
-	cmd := tmpBuffer[:n]
-	if len(cmd) < 4 {
+	if n < 10 || !bytes.Equal([]byte{0x5, 1, 0}, tmpBuffer[:3]) {
 		s.Write([]byte{0x05, 0x0B, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 		log.Println("cmd length is too short!!")
 		return nil, errors.New("cmd length is too short")
 	}
-	if cmd[0] != 0x5 {
-		s.Write([]byte{0x05, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-		log.Println("cmd protocol is incorrect")
-		return nil, errors.New("cmd protocol is incorrect")
-	}
 
-	if cmd[1] != 0x1 {
-		s.Write([]byte{0x05, 0x0D, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-		log.Println("does not support other command")
-		return nil, errors.New("does not support other command")
-	}
+	cmd := tmpBuffer[:n]
 	adr := core.NewSocks5Address()
 	err = adr.Parse(cmd[3:])
 	if err != nil {
@@ -129,6 +158,8 @@ func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
 		log.Println("parse cmd address failed", err)
 		return nil, err
 	}
+
+	log.Println("3. ", adr.String())
 
 	remote, err := net.Dial("tcp", adr.String())
 	if err != nil {
@@ -145,6 +176,8 @@ func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
 		return nil, err
 	}
 
+	log.Println("4. ", rAddress.String())
+
 	var op bytes.Buffer
 	op.Write([]byte{0x5, 0x00, 0x00})
 	op.Write(rAddress.Bytes())
@@ -155,6 +188,6 @@ func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
 		remote.Close()
 		return nil, err
 	}
-
+	log.Println("5. ", "ok")
 	return remote, nil
 }

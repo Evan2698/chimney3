@@ -173,16 +173,12 @@ func (s *Socks5S) echoHello(session *socks5session) error {
 		return err
 	}
 	res := []byte{socks5Version, 0xff}
-	if n < 3 || tmpBuffer[0] != socks5Version {
+	if n != 3 || !bytes.Equal([]byte{socks5Version, 0x1}, tmpBuffer[:2]) {
 		con.Write(res)
 		log.Println("client hello message: ", tmpBuffer[:n])
 		return errors.New("client hello message error")
 	}
-	if tmpBuffer[1] < 1 {
-		con.Write(res)
-		log.Println("length of method : ", tmpBuffer[:n])
-		return errors.New("length of method format error")
-	}
+
 	if tmpBuffer[2] == socks5NoAuth {
 		res = []byte{socks5Version, socks5NoAuth}
 		_, err = con.Write(res)
