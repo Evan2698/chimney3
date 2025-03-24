@@ -143,6 +143,12 @@ func (c *Socks5) authenticateUser(con io.ReadWriteCloser, key []byte) error {
 	out.Write(usr)
 	out.WriteByte(byte(n))
 	out.Write(tmpOutBuffer[:n])
+	log.Println("sha1 ", usrsha1, "enc=", tmpOutBuffer[:n])
+
+	log.Println("I=", c.I.ToBytes())
+	log.Println("user len=(C)", userLen, " username byte: ", usr, "username=", c.Settings.User)
+	log.Println("key= ", key)
+	log.Print("pass origin=", usrsha1, "unpress=", tmpOutBuffer[:n])
 
 	if _, err = con.Write(out.Bytes()); err != nil {
 		log.Println("send user and pass failed! ", err)
@@ -167,6 +173,7 @@ func (c *Socks5) authenticateUser(con io.ReadWriteCloser, key []byte) error {
 
 func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byte) (dst *core.Socks5Address, err error) {
 
+	log.Println("socks5 address: ", addr.String(), addr.Bytes())
 	var op bytes.Buffer
 	op.Write([]byte{socks5Version, socks5CMDConnect, 0x00, addr.Type})
 	tmpBuffer := mem.NewApplicationBuffer().GetSmall()
@@ -180,6 +187,7 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 	}
 	op.WriteByte(byte(n))
 	op.Write(tmpBuffer[:n])
+	log.Println("address-client: ", op.Bytes(), "LL", tmpBuffer[:n])
 
 	if _, err = con.Write(op.Bytes()); err != nil {
 		log.Println("send request failed ", err)
@@ -198,6 +206,7 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 	}
 
 	response := tmpBuffer[5:n]
+	log.Println("compress", tmpBuffer[:n], response)
 	tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpOutBuffer)
@@ -208,12 +217,16 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 		return nil, err
 	}
 
+	log.Println("add-->ori", tmpOutBuffer[:n])
+
 	socks5Address := core.NewSocks5Address()
 	err = socks5Address.Parse(tmpOutBuffer[:n])
 	if err != nil {
 		log.Println("dst address parse failed: ", err)
 		return nil, err
 	}
+
+	log.Println("client--->", socks5Address.String())
 
 	return socks5Address, nil
 }

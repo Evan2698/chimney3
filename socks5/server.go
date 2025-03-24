@@ -223,10 +223,9 @@ func (s *Socks5S) authUser(session *socks5session) error {
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpBuffer)
 	}()
-	res := []byte{socks5Version, 0xff}
+
 	n, err := con.Read(tmpBuffer)
 	if err != nil {
-		con.Write(res)
 		return err
 	}
 
@@ -237,11 +236,13 @@ func (s *Socks5S) authUser(session *socks5session) error {
 	if tmpBuffer[0] != socks5Version || tmpBuffer[1] != socks5AuthWithUserPass {
 		return errors.New("verify user failed")
 	}
+
 	userLen := tmpBuffer[2]
 	usr := tmpBuffer[3 : 3+userLen]
 	userName := string(usr)
 
 	pass := tmpBuffer[3+userLen+1 : n]
+
 	sha1 := privacy.BuildMacHash(session.Key, userName)
 	tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
@@ -252,6 +253,12 @@ func (s *Socks5S) authUser(session *socks5session) error {
 		log.Println("uncompress user name failed", err)
 		return err
 	}
+
+	log.Println("I=", session.I.ToBytes())
+	log.Println("user len=", userLen, " username byte: ", usr, "username=", userName)
+	log.Println("key= ", session.Key)
+	log.Print("pass origin=", pass, "unpress=", tmpOutBuffer[:n])
+
 	if bytes.Equal(sha1, tmpOutBuffer[:n]) {
 		con.Write([]byte{socks5Version, 0x00})
 		log.Println("verify success!")
@@ -277,41 +284,43 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 		return nil, err
 	}
 
-	cmd := tmpBuffer[:n]
-	log.Println("connect: ", tmpBuffer[:n])
-	if len(cmd) < 4 {
-		conn.Write([]byte{0x05, 0x0F, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-		log.Println("cmd length is too short!!")
-		return nil, errors.New("cmd length is too short")
-	}
-	if cmd[0] != socks5Version {
-		conn.Write([]byte{0x05, 0x0E, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-		log.Println("cmd protocol is incorrect")
-		return nil, errors.New("cmd protocol is incorrect")
+	if n < 10 {
+		conn.Write([]byte{0x05, 0x0A, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+		log.Println("protocol is incorrect", n, tmpBuffer[:n])
+		return nil, errors.New("protocol is incorrect")
 	}
 
-	if socks5CMDConnect != cmd[1] {
+	if !bytes.Equal([]byte{socks5Version, socks5CMDConnect, 0}, tmpBuffer[:3]) {
 		conn.Write([]byte{0x05, 0x0B, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-		log.Println("command is not connection command")
-		return nil, errors.New("command is not connection command")
+		log.Println("connection command is incorrect", n, tmpBuffer[:n])
+		return nil, errors.New("connection command is incorrect")
 	}
+
+	cmd := tmpBuffer[:n]
 
 	if session.AuthenticateUser {
+		tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
+		defer func() {
+			mem.NewApplicationBuffer().PutSmall(tmpOutBuffer)
+		}()
+
 		text := cmd[5:]
+		log.Println("ip compressed: ", text)
 		if int(cmd[4]) != len(text) {
 			conn.Write([]byte{0x05, 0x1B, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("address not is incorrect")
 			return nil, errors.New("address length is incorrect")
 		}
 
-		n, err = session.I.Uncompress(text, session.Key, tmpBuffer)
+		n, err = session.I.Uncompress(text, session.Key, tmpOutBuffer)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x0C, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("command is not connection command")
 			return nil, err
 		}
+		log.Println("origin ip=", tmpOutBuffer[:n])
 		addr := core.NewSocks5Address()
-		err = addr.Parse(tmpBuffer[:n])
+		err = addr.Parse(tmpOutBuffer[:n])
 		if err != nil {
 			conn.Write([]byte{0x05, 0x0B, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("command is not connection command")
@@ -347,12 +356,14 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 
 	} else {
 		address := core.NewSocks5Address()
-		err = address.Parse(cmd[4:])
+		log.Println("origin cmd", cmd)
+		err = address.Parse(cmd[3:])
 		if err != nil {
 			conn.Write([]byte{0x05, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("parse socks5 connect address failed", err)
 			return nil, err
 		}
+		log.Println("socks-client address: ", address.String())
 		remoteAddress, err := s.buildTcpSocketWithSocks5Address(address)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x12, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})

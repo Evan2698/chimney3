@@ -17,6 +17,7 @@ func TestXxx(t *testing.T) {
 	I.Uncompress(small[:5], key, out)
 	result := string(out[:5])
 	t.Log(result)
+	t.Log(result)
 	if result != "hello" {
 		t.Error("salsa20 compress error")
 	} else {
