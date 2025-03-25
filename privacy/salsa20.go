@@ -16,7 +16,7 @@ type saLsa20 struct {
 
 const (
 	salsa20name = "SALSA-20"
-	salsa20Code = 0x1236
+	salsa20Code = 0x1237
 )
 
 func (salsa *saLsa20) Compress(src []byte, key []byte, out []byte) (int, error) {

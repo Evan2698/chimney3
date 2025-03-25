@@ -12,10 +12,10 @@ func TestXxx(t *testing.T) {
 	key := MakeCompressKey("SALSA-20")
 	buffer := mem.NewApplicationBuffer()
 	small := buffer.GetSmall()
-	I.Compress([]byte("hello"), key, small)
+	n, _ := I.Compress([]byte("zhangssskkdjdjakg"), key, small)
 	out := buffer.GetSmall()
-	I.Uncompress(small[:5], key, out)
-	result := string(out[:5])
+	I.Uncompress(small[:n], key, out)
+	result := string(out[:n])
 	t.Log(result)
 	t.Log(result)
 	if result != "hello" {

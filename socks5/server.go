@@ -151,6 +151,7 @@ func copyConnect2Connect(src, dst net.Conn, wg *sync.WaitGroup) {
 			log.Println("read src failed ", err)
 			break
 		}
+		log.Println("content: ", tmpBuffer[:n])
 		_, err = dst.Write(tmpBuffer[:n])
 		if err != nil {
 			log.Println("write dst failed ", err)
@@ -334,8 +335,8 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			return nil, err
 		}
 
-		ra, _ := core.ParseTargetAddress(remote.RemoteAddr().String())
-		n, err = session.I.Compress(ra.Bytes(), session.Key, tmpBuffer)
+		dstA, _ := core.ParseTargetAddress(remote.RemoteAddr().String())
+		n, err = session.I.Compress(dstA.Bytes(), session.Key, tmpBuffer)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("remote address compress failed", err)
@@ -343,7 +344,7 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			return nil, err
 		}
 		var op bytes.Buffer
-		op.Write([]byte{socks5Version, socks5ReplySuccess, 0x00, ra.Type})
+		op.Write([]byte{socks5Version, socks5ReplySuccess, 0x00, dstA.Type})
 		op.WriteByte(byte(n))
 		op.Write(tmpBuffer[:n])
 		_, err = conn.Write(op.Bytes())
@@ -352,7 +353,11 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			log.Print("write response failed ", err)
 			return nil, err
 		}
-		return remote, nil
+
+		srcA, _ := core.ParseTargetAddress(remote.LocalAddr().String())
+		remoteStream := core.NewSocks5Socket(remote, session.I, session.Key, srcA, dstA)
+
+		return remoteStream, nil
 
 	} else {
 		address := core.NewSocks5Address()
@@ -364,21 +369,22 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			return nil, err
 		}
 		log.Println("socks-client address: ", address.String())
-		remoteAddress, err := s.buildTcpSocketWithSocks5Address(address)
+		remoteSocks5Stream, err := s.buildTcpSocketWithSocks5Address(address)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x12, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("parse socks5 connect address failed", err)
 			return nil, err
 		}
 
-		ra := remoteAddress.GetDstSocks5Address()
+		ra := remoteSocks5Stream.GetDstSocks5Address()
+		log.Println("remote addr: ", ra.Bytes(), ra.String())
 
 		var op bytes.Buffer
 		op.Write([]byte{socks5Version, socks5ReplySuccess, 0x00})
 		op.Write(ra.Bytes())
 		conn.Write(op.Bytes())
 
-		return remoteAddress, nil
+		return remoteSocks5Stream, nil
 	}
 
 }

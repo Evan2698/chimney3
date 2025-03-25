@@ -7,6 +7,7 @@ import (
 	"chimney3/privacy"
 	"crypto/sha1"
 	"errors"
+	"io"
 	"log"
 	"net"
 	"sync"
@@ -64,55 +65,12 @@ func serverOn(s *kcpSession) {
 }
 
 func copy2tt(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
-	//io.Copy(d, s)
-
-	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
-	defer func(b []byte) {
-		mem.NewApplicationBuffer().PutLarge(b)
-
-	}(tmpBuffer)
-
-	for {
-		n, err := s.Read(tmpBuffer)
-		if err != nil {
-			log.Println("web to kcp", err)
-			break
-		}
-		log.Println("8, ", tmpBuffer[:n])
-
-		_, err = d.Write(tmpBuffer[:n])
-		if err != nil {
-			log.Println("web to kcp2", err)
-			break
-		}
-	}
-
+	io.Copy(d, s)
 	wg.Done()
 }
 
 func copy2(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
-	//io.Copy(d, s)
-
-	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
-	defer func(b []byte) {
-		mem.NewApplicationBuffer().PutLarge(b)
-
-	}(tmpBuffer)
-
-	for {
-		n, err := s.Read(tmpBuffer)
-		if err != nil {
-			log.Println("web to kcp3", err)
-			break
-		}
-		log.Println("7, ", tmpBuffer[:n])
-
-		_, err = d.Write(tmpBuffer[:n])
-		if err != nil {
-			log.Println("web to kcp4", err)
-			break
-		}
-	}
+	io.Copy(d, s)
 	wg.Done()
 }
 
