@@ -1,7 +1,6 @@
 package kcpproxy
 
 import (
-	"chimney3/mem"
 	"chimney3/privacy"
 	"crypto/sha1"
 	"log"
@@ -48,55 +47,7 @@ func onclientOn(con net.Conn, block kcp.BlockCrypt, host string) {
 	}()
 	wg := sync.WaitGroup{}
 	wg.Add(2)
-	go copyK2N(s, con, &wg)
-	go copyN2K(s, con, &wg)
+	go copy(s, con, &wg)
+	go copy(con, s, &wg)
 	wg.Wait()
-}
-
-func copyK2N(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
-
-	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
-	defer func(b []byte) {
-		mem.NewApplicationBuffer().PutLarge(b)
-
-	}(tmpBuffer)
-
-	for {
-		n, err := s.Read(tmpBuffer)
-		if err != nil {
-			log.Println("web to kcp", err)
-			break
-		}
-
-		_, err = d.Write(tmpBuffer[:n])
-		if err != nil {
-			log.Println("web to kcp2", err)
-			break
-		}
-	}
-	wg.Done()
-}
-
-func copyN2K(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
-
-	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
-	defer func(b []byte) {
-		mem.NewApplicationBuffer().PutLarge(b)
-
-	}(tmpBuffer)
-
-	for {
-		n, err := s.Read(tmpBuffer)
-		if err != nil {
-			log.Println("web to kcp", err)
-			break
-		}
-
-		_, err = d.Write(tmpBuffer[:n])
-		if err != nil {
-			log.Println("web to kcp2", err)
-			break
-		}
-	}
-	wg.Done()
 }

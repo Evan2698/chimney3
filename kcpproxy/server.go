@@ -7,7 +7,6 @@ import (
 	"chimney3/privacy"
 	"crypto/sha1"
 	"errors"
-	"io"
 	"log"
 	"net"
 	"sync"
@@ -58,20 +57,10 @@ func serverOn(s *kcpSession) {
 	}()
 	wg := sync.WaitGroup{}
 	wg.Add(2)
-	go copy2(s.S, dst, &wg)
-	go copy2tt(s.S, dst, &wg)
+	go copy(s.S, dst, &wg)
+	go copy(dst, s.S, &wg)
 	wg.Wait()
 
-}
-
-func copy2tt(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
-	io.Copy(d, s)
-	wg.Done()
-}
-
-func copy2(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
-	io.Copy(d, s)
-	wg.Done()
 }
 
 func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
