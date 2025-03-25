@@ -117,8 +117,6 @@ func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
 		return nil, err
 	}
 
-	log.Println("3. ", adr.String())
-
 	remote, err := net.Dial("tcp", adr.String())
 	if err != nil {
 		s.Write([]byte{0x05, 0x0F, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
@@ -134,18 +132,15 @@ func echoSocks5Hello(s *kcp.UDPSession) (net.Conn, error) {
 		return nil, err
 	}
 
-	log.Println("4. ", rAddress.String())
-
 	var op bytes.Buffer
 	op.Write([]byte{0x5, 0x00, 0x00})
 	op.Write(rAddress.Bytes())
 	_, err = s.Write(op.Bytes())
 	if err != nil {
-		s.Write([]byte{0x05, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 		log.Println("write remote failed", err)
 		remote.Close()
 		return nil, err
 	}
-	log.Println("5. ", "ok")
+
 	return remote, nil
 }
