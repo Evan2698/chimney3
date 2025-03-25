@@ -255,11 +255,6 @@ func (s *Socks5S) authUser(session *socks5session) error {
 		return err
 	}
 
-	// log.Println("I=", session.I.ToBytes())
-	// log.Println("user len=", userLen, " username byte: ", usr, "username=", userName)
-	// log.Println("key= ", session.Key)
-	// log.Print("pass origin=", pass, "unpress=", tmpOutBuffer[:n])
-
 	if bytes.Equal(sha1, tmpOutBuffer[:n]) {
 		con.Write([]byte{socks5Version, 0x00})
 		log.Println("verify success!")

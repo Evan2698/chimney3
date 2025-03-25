@@ -54,7 +54,6 @@ func onclientOn(con net.Conn, block kcp.BlockCrypt, host string) {
 }
 
 func copyK2N(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
-	//io.Copy(d, s)
 
 	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
 	defer func(b []byte) {
@@ -68,7 +67,6 @@ func copyK2N(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
 			log.Println("web to kcp", err)
 			break
 		}
-		//log.Println("8, ", tmpBuffer[:n])
 
 		_, err = d.Write(tmpBuffer[:n])
 		if err != nil {
@@ -80,7 +78,7 @@ func copyK2N(s *kcp.UDPSession, d net.Conn, wg *sync.WaitGroup) {
 }
 
 func copyN2K(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
-	//io.Copy(d, s)
+
 	tmpBuffer := mem.NewApplicationBuffer().GetLarge()
 	defer func(b []byte) {
 		mem.NewApplicationBuffer().PutLarge(b)
@@ -93,7 +91,6 @@ func copyN2K(d *kcp.UDPSession, s net.Conn, wg *sync.WaitGroup) {
 			log.Println("web to kcp", err)
 			break
 		}
-		//log.Println("8, ", tmpBuffer[:n])
 
 		_, err = d.Write(tmpBuffer[:n])
 		if err != nil {

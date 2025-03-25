@@ -223,7 +223,7 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 		return nil, err
 	}
 
-	log.Println("client--->", socks5Address.String())
+	//log.Println("client--->", socks5Address.String())
 
 	return socks5Address, nil
 }
