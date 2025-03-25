@@ -145,8 +145,9 @@ func copyConnect2Connect(src, dst net.Conn, wg *sync.WaitGroup) {
 		mem.NewApplicationBuffer().PutLarge(tmpBuffer)
 	}()
 
+	offset := mem.LARGE_BUFFER_SIZE - BUFFER_OFFSET
 	for {
-		n, err := src.Read(tmpBuffer[:mem.LARGE_BUFFER_SIZE-BUFFER_OFFSET])
+		n, err := src.Read(tmpBuffer[:offset])
 		if err != nil {
 			log.Println("read src failed ", err)
 			break
