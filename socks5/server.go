@@ -151,7 +151,7 @@ func copyConnect2Connect(src, dst net.Conn, wg *sync.WaitGroup) {
 			log.Println("read src failed ", err)
 			break
 		}
-		log.Println("content: ", tmpBuffer[:n])
+
 		_, err = dst.Write(tmpBuffer[:n])
 		if err != nil {
 			log.Println("write dst failed ", err)
@@ -255,10 +255,10 @@ func (s *Socks5S) authUser(session *socks5session) error {
 		return err
 	}
 
-	log.Println("I=", session.I.ToBytes())
-	log.Println("user len=", userLen, " username byte: ", usr, "username=", userName)
-	log.Println("key= ", session.Key)
-	log.Print("pass origin=", pass, "unpress=", tmpOutBuffer[:n])
+	// log.Println("I=", session.I.ToBytes())
+	// log.Println("user len=", userLen, " username byte: ", usr, "username=", userName)
+	// log.Println("key= ", session.Key)
+	// log.Print("pass origin=", pass, "unpress=", tmpOutBuffer[:n])
 
 	if bytes.Equal(sha1, tmpOutBuffer[:n]) {
 		con.Write([]byte{socks5Version, 0x00})
@@ -354,10 +354,13 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			return nil, err
 		}
 
-		srcA, _ := core.ParseTargetAddress(remote.LocalAddr().String())
-		remoteStream := core.NewSocks5Socket(remote, session.I, session.Key, srcA, dstA)
+		// wrape the origin connection.
+		srcAddr, _ := core.ParseTargetAddress(session.Conn.LocalAddr().String())
+		dstAddr, _ := core.ParseTargetAddress(session.Conn.RemoteAddr().String())
+		srcStream := core.NewSocks5Socket(session.Conn, session.I, session.Key, srcAddr, dstAddr)
+		session.Conn = srcStream
 
-		return remoteStream, nil
+		return remote, nil
 
 	} else {
 		address := core.NewSocks5Address()

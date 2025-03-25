@@ -56,7 +56,7 @@ func (sock *Socks5Socket) Read(b []byte) (int, error) {
 	}
 
 	vLen := utils.Bytes2Int(buffer)
-	log.Println("read: ", buffer, vLen)
+
 	if (vLen > uint32(mem.LARGE_BUFFER_SIZE)) || (vLen <= 0) {
 		log.Println("read raw content failed, invalid length", vLen)
 		return 0, errors.New("invalid length")
