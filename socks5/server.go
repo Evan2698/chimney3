@@ -246,17 +246,18 @@ func (s *Socks5S) authUser(session *socks5session) error {
 	pass := tmpBuffer[3+userLen+1 : n]
 
 	sha1 := privacy.BuildMacHash(session.Key, userName)
+
 	tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpOutBuffer)
 	}()
-	n, err = session.I.Uncompress(pass, session.Key, tmpOutBuffer)
+	counter, err := session.I.Uncompress(pass, session.Key, tmpOutBuffer)
 	if err != nil {
 		log.Println("uncompress user name failed", err)
 		return err
 	}
 
-	if bytes.Equal(sha1, tmpOutBuffer[:n]) {
+	if bytes.Equal(sha1, tmpOutBuffer[:counter]) {
 		con.Write([]byte{socks5Version, 0x00})
 		log.Println("verify success!")
 		return nil
@@ -302,7 +303,6 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 		}()
 
 		text := cmd[5:]
-		log.Println("ip compressed: ", text)
 		if int(cmd[4]) != len(text) {
 			conn.Write([]byte{0x05, 0x1B, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("address not is incorrect")
@@ -315,7 +315,7 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 			log.Println("command is not connection command")
 			return nil, err
 		}
-		log.Println("origin ip=", tmpOutBuffer[:n])
+
 		addr := core.NewSocks5Address()
 		err = addr.Parse(tmpOutBuffer[:n])
 		if err != nil {
@@ -360,14 +360,13 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 
 	} else {
 		address := core.NewSocks5Address()
-		log.Println("origin cmd", cmd)
 		err = address.Parse(cmd[3:])
 		if err != nil {
 			conn.Write([]byte{0x05, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 			log.Println("parse socks5 connect address failed", err)
 			return nil, err
 		}
-		log.Println("socks-client address: ", address.String())
+
 		remoteSocks5Stream, err := s.buildTcpSocketWithSocks5Address(address)
 		if err != nil {
 			conn.Write([]byte{0x05, 0x12, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
@@ -376,7 +375,6 @@ func (s *Socks5S) doCommandConnect(session *socks5session) (remote net.Conn, err
 		}
 
 		ra := remoteSocks5Stream.GetDstSocks5Address()
-		log.Println("remote addr: ", ra.Bytes(), ra.String())
 
 		var op bytes.Buffer
 		op.Write([]byte{socks5Version, socks5ReplySuccess, 0x00})

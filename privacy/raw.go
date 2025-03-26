@@ -19,8 +19,8 @@ const (
 
 func (raw *rawMethod) Compress(src []byte, key []byte, out []byte) (int, error) {
 	defer utils.Trace("Compress")()
-	copy(out, src)
-	return len(src), nil
+	n := copy(out, src)
+	return n, nil
 }
 
 func (raw *rawMethod) Uncompress(src []byte, key []byte, out []byte) (int, error) {

@@ -4,7 +4,7 @@
 		"port": 9001,
 		"user": "where",
 		"password": "Evan$%#@!#$@!123",
-		"method": "CHACHA-20",
+		"method": "AES-GCM",
 		"udpport": 45
 
 	},
