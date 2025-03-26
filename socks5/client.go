@@ -173,7 +173,6 @@ func (c *Socks5) authenticateUser(con io.ReadWriteCloser, key []byte) error {
 
 func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byte) (dst *core.Socks5Address, err error) {
 
-	log.Println("socks5 address: ", addr.String(), addr.Bytes())
 	var op bytes.Buffer
 	op.Write([]byte{socks5Version, socks5CMDConnect, 0x00, addr.Type})
 	tmpBuffer := mem.NewApplicationBuffer().GetSmall()
@@ -205,7 +204,7 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 	}
 
 	response := tmpBuffer[5:n]
-	log.Println("compress", tmpBuffer[:n], response)
+
 	tmpOutBuffer := mem.NewApplicationBuffer().GetSmall()
 	defer func() {
 		mem.NewApplicationBuffer().PutSmall(tmpOutBuffer)
