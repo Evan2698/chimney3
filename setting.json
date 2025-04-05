@@ -16,5 +16,5 @@
 		"udpport": 59
 	
 	},
-	"which": "kcp"
+	"which": "proxy"
 }

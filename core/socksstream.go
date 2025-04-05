@@ -49,7 +49,7 @@ func (sock *Socks5Socket) Read(b []byte) (int, error) {
 		mem.NewApplicationBuffer().PutLarge(tmpBuffer)
 	}()
 
-	buffer, err := readXBytes(4, tmpBuffer[:4], sock.RawConnection)
+	buffer, err := ReadXBytes(4, tmpBuffer[:4], sock.RawConnection)
 	if err != nil {
 		log.Println("read raw content failed", err)
 		return 0, err
@@ -62,7 +62,7 @@ func (sock *Socks5Socket) Read(b []byte) (int, error) {
 		return 0, errors.New("invalid length")
 	}
 
-	buffer, err = readXBytes(vLen, tmpBuffer[:vLen], sock.RawConnection)
+	buffer, err = ReadXBytes(vLen, tmpBuffer[:vLen], sock.RawConnection)
 	if err != nil {
 		log.Println("read raw content failed", err)
 		return 0, err
@@ -109,13 +109,13 @@ func (sock *Socks5Socket) Write(b []byte) (int, error) {
 		return 0, err
 	}
 	vLenBuffer := utils.Int2Bytes(uint32(n))
-	_, err = writeXBytes(vLenBuffer, sock.RawConnection)
+	_, err = WriteXBytes(vLenBuffer, sock.RawConnection)
 	if err != nil {
 		log.Println("write length of content failed: ", err)
 		return 0, err
 	}
 
-	_, err = writeXBytes(outBuffer[:n], sock.RawConnection)
+	_, err = WriteXBytes(outBuffer[:n], sock.RawConnection)
 	if err != nil {
 		log.Println("write content failed: ", err)
 		return 0, err

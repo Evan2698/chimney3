@@ -7,7 +7,7 @@ import (
 	"net"
 )
 
-func readXBytes(bytes uint32, buffer []byte, con net.Conn) ([]byte, error) {
+func ReadXBytes(bytes uint32, buffer []byte, con net.Conn) ([]byte, error) {
 	defer utils.Trace("readXBytes.readXBytes")()
 	if bytes <= 0 {
 		return nil, errors.New("0 bytes can not read! ")
@@ -38,7 +38,7 @@ func readXBytes(bytes uint32, buffer []byte, con net.Conn) ([]byte, error) {
 	return buffer[:bytes], err
 }
 
-func writeXBytes(buffer []byte, con net.Conn) (int, error) {
+func WriteXBytes(buffer []byte, con net.Conn) (int, error) {
 	defer utils.Trace("writeXBytes.writeXBytes")()
 	nbytes := uint32(len(buffer))
 	var index uint32 = 0
