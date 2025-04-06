@@ -1,16 +1,10 @@
 package socks5
 
 import (
+	"chimney3/core"
 	"net"
-	"time"
 )
 
 func SetSocketTimeout(con net.Conn, tm uint32) {
-	if con != nil && tm != 0 {
-		readTimeout := time.Duration(tm) * time.Second
-		v := time.Now().Add(readTimeout)
-		con.SetReadDeadline(v)
-		con.SetWriteDeadline(v)
-		con.SetDeadline(v)
-	}
+	core.SetConnectTimeout(con, tm)
 }

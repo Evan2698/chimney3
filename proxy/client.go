@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"chimney3/core"
 	"chimney3/mem"
 	"chimney3/privacy"
 	"log"
@@ -64,14 +65,28 @@ func (c *proxyClient) serveOn(con net.Conn) {
 	defer con.Close()
 
 	//do handshake
-	//dst, err := c.handshake(c.ProxyAddress, con)
-	dst, err := net.Dial("tcp", c.ProxyAddress)
+	key := privacy.MakeCompressKey(c.Password)
+
+	dstIm, err := net.Dial("tcp", c.ProxyAddress)
 	if err != nil {
 		log.Println("handshake failed ", err)
 		return
 	}
-	defer dst.Close()
 
+	dst := core.NewMySSLSocket(dstIm, nil, key)
+	err = dst.HandshakeClient()
+	if err != nil {
+		dst.Close()
+		log.Println("handshake failed ", err)
+		return
+	}
+	if !dst.IsOk() {
+		dst.Close()
+		log.Println("check dst status failed! ", err)
+		return
+	}
+
+	defer dst.Close()
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go transfer(dst, con, &wg)
@@ -80,57 +95,57 @@ func (c *proxyClient) serveOn(con net.Conn) {
 
 }
 
-func (c *proxyClient) handshake(host string, con net.Conn) (net.Conn, error) {
-	// handshake
-	// 1. send username and password
-	// 2. receive username and password
-	// 3. send ok or not
-	// 4. receive ok or not
+// func (c *proxyClient) handshake(host string, con net.Conn) (net.Conn, error) {
+// 	// handshake
+// 	// 1. send username and password
+// 	// 2. receive username and password
+// 	// 3. send ok or not
+// 	// 4. receive ok or not
 
-	dst, err := net.Dial("tcp", host)
-	if err != nil {
-		log.Println("dial failed ", err)
-		return nil, err
-	}
+// 	dst, err := net.Dial("tcp", host)
+// 	if err != nil {
+// 		log.Println("dial failed ", err)
+// 		return nil, err
+// 	}
 
-	// send username and password
-	_, err = dst.Write([]byte{0x5, 0x1, 0x0})
-	if err != nil {
-		log.Println("write failed ", err)
-		dst.Close()
-		return nil, err
-	}
+// 	// send username and password
+// 	_, err = dst.Write([]byte{0x5, 0x1, 0x0})
+// 	if err != nil {
+// 		log.Println("write failed ", err)
+// 		dst.Close()
+// 		return nil, err
+// 	}
 
-	buffer := mem.NewApplicationBuffer().GetSmall()
-	defer func() {
-		mem.NewApplicationBuffer().PutSmall(buffer)
-	}()
-	n, err := dst.Read(buffer)
-	if err != nil {
-		log.Println("read failed ", err)
-		dst.Close()
-		return nil, err
-	}
+// 	buffer := mem.NewApplicationBuffer().GetSmall()
+// 	defer func() {
+// 		mem.NewApplicationBuffer().PutSmall(buffer)
+// 	}()
+// 	n, err := dst.Read(buffer)
+// 	if err != nil {
+// 		log.Println("read failed ", err)
+// 		dst.Close()
+// 		return nil, err
+// 	}
 
-	if int(buffer[0]) != n-1 {
-		log.Println("handshake failed ", err)
-		dst.Close()
-		return nil, err
-	}
-	pBuffer := buffer[1:n]
-	II, err := privacy.FromBytes(pBuffer)
-	if err != nil {
-		log.Println("handshake failed ", err)
-		dst.Close()
-		return nil, err
-	}
-	// send ok
-	c.I = II
-	dst.Write([]byte{0x5, 0x0})
-	// receive ok
-	key := privacy.MakeCompressKey(c.Password)
-	return NewProxySocket(dst, c.I, key), nil
-}
+// 	if int(buffer[0]) != n-1 {
+// 		log.Println("handshake failed ", err)
+// 		dst.Close()
+// 		return nil, err
+// 	}
+// 	pBuffer := buffer[1:n]
+// 	II, err := privacy.FromBytes(pBuffer)
+// 	if err != nil {
+// 		log.Println("handshake failed ", err)
+// 		dst.Close()
+// 		return nil, err
+// 	}
+// 	// send ok
+// 	c.I = II
+// 	dst.Write([]byte{0x5, 0x0})
+// 	// receive ok
+// 	key := privacy.MakeCompressKey(c.Password)
+// 	return NewProxySocket(dst, c.I, key), nil
+// }
 
 func transfer(src, dst net.Conn, wg *sync.WaitGroup) {
 	defer func() {
