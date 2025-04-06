@@ -66,7 +66,6 @@ func (c *proxyClient) serveOn(con net.Conn) {
 
 	//do handshake
 	key := privacy.MakeCompressKey(c.Password)
-
 	dstIm, err := net.Dial("tcp", c.ProxyAddress)
 	if err != nil {
 		log.Println("handshake failed ", err)

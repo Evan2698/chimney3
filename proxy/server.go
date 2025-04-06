@@ -25,14 +25,6 @@ type proxyServer struct {
 }
 
 func (p *proxyServer) Serve() {
-	// // Implement the logic to start the proxy server
-	// //l, err := NewProxyListener(p.Host, p.Password, p.Which)
-	// l, err := net.Listen("tcp", p.Host)
-
-	// // key := pbkdf2.Key([]byte("demo pass"), []byte("demo salt"), 1024, 32, sha1.New)
-	// // block, _ := kcp.NewAESBlockCrypt(key)
-	// // l, err := kcp.ListenWithOptions(p.Host, block, 10, 3)
-
 	key := privacy.MakeCompressKey(p.Password)
 	II := privacy.NewMethodWithName(p.Which)
 	l, err := core.ListenSSL(p.Host, key, II)
