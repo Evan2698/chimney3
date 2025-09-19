@@ -7,16 +7,16 @@ import (
 	"strconv"
 )
 
+// RunServer 启动 SOCKS5 服务器或客户端，依据 isServer 参数。
 func RunServer(s *settings.Settings, isServer bool) error {
 	if isServer {
-		runSocks5Server(s)
-	} else {
-		runSocks5Client(s)
+		return startSocks5Server(s)
 	}
-	return nil
+	return startSocks5Client(s)
 }
 
-func runSocks5Server(s *settings.Settings) {
+// startSocks5Server 构建并启动 SOCKS5 服务器。
+func startSocks5Server(s *settings.Settings) error {
 	ss := &Socks5ServerSettings{
 		ListenAddress: net.JoinHostPort(s.Server.IP, strconv.Itoa(s.Server.Port)),
 		User:          s.Server.User,
@@ -24,12 +24,13 @@ func runSocks5Server(s *settings.Settings) {
 		ProxyAddress:  net.JoinHostPort("127.0.0.1", strconv.Itoa(s.Server.Port)),
 		Method:        s.Server.Method,
 	}
-	log.Println("This is server!!")
+	log.Println("SOCKS5 server starting...")
 	server := NewSocks5Server(ss, nil)
-	server.Serve()
+	return server.Serve()
 }
 
-func runSocks5Client(s *settings.Settings) {
+// startSocks5Client 构建并启动 SOCKS5 客户端。
+func startSocks5Client(s *settings.Settings) error {
 	ss := &Socks5ServerSettings{
 		ListenAddress: net.JoinHostPort(s.Client.IP, strconv.Itoa(s.Client.Port)),
 		User:          s.Client.User,
@@ -37,8 +38,8 @@ func runSocks5Client(s *settings.Settings) {
 		ProxyAddress:  net.JoinHostPort(s.Server.IP, strconv.Itoa(s.Server.Port)),
 		Method:        s.Server.Method,
 	}
-	log.Println("This is client!!")
+	log.Println("SOCKS5 client starting...")
 	server := NewSocks5Server(ss, nil)
 	go Run2HTTP(s)
-	server.Serve()
+	return server.Serve()
 }
