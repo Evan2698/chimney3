@@ -33,6 +33,8 @@ func Run2HTTP(s *settings.Settings) error {
 		log.Fatalln("can not start http server:", err)
 	}
 
+	return nil
+
 }
 func (h *HttpProxyRoutineHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	hijack, ok := w.(http.Hijacker)
