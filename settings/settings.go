@@ -21,6 +21,7 @@ type Settings struct {
 		User     string `json:"user"`
 		Password string `json:"password"`
 		Udpport  int    `json:"udpport"`
+		Httpurl  string `json:"httpurl"`
 	} `json:"client"`
 
 	Which string `json:"which"`

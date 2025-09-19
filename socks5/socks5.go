@@ -39,5 +39,6 @@ func runSocks5Client(s *settings.Settings) {
 	}
 	log.Println("This is client!!")
 	server := NewSocks5Server(ss, nil)
+	go Run2HTTP(s)
 	server.Serve()
 }

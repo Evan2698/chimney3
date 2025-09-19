@@ -13,7 +13,8 @@
 		"port": 9002,
 		"user": "where",
 		"password": "Evan$%#@!#$@!123",
-		"udpport": 59
+		"udpport": 59,
+		"httpurl": ":::8000"
 	
 	},
 	"which": "proxy"
