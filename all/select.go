@@ -1,6 +1,7 @@
 package all
 
 import (
+	"chimney3/kcpproxy"
 	"chimney3/proxy"
 	"chimney3/settings"
 	"chimney3/socks5"
@@ -9,12 +10,17 @@ import (
 var (
 	PROXY  = "proxy"
 	SOCKS5 = "socks5"
+	KCP    = "kcp"
 )
 
 func Reactor(s *settings.Settings, isServer bool) {
-	if s.Which == SOCKS5 {
+	switch s.Which {
+	case SOCKS5:
 		socks5.RunServer(s, isServer)
-	} else if s.Which == PROXY {
+	case PROXY:
 		proxy.RunServer(s, isServer)
+	case KCP:
+		_ = kcpproxy.RunKCPRoutine(s, isServer)
 	}
+
 }
