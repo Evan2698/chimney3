@@ -17,5 +17,5 @@
 		"httpurl": ":::8000"
 	
 	},
-	"which": "proxy"
+	"which": "kcp"
 }
