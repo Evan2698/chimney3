@@ -1,7 +1,6 @@
-package socks5
+package core
 
 import (
-	"chimney3/settings"
 	"fmt"
 	"io"
 	"log"
@@ -19,9 +18,8 @@ type HttpProxyRoutineHandler struct {
 }
 
 // Run2HTTP 启动 HTTP 到 SOCKS5 的代理服务。
-func Run2HTTP(s *settings.Settings) error {
-	httpUrl := s.Client.Httpurl
-	socks5Addr := fmt.Sprintf("socks5://%s:%d", s.Client.IP, s.Client.Port)
+func Run2HTTP(httpUrl, socks5Url string) error {
+	socks5Addr := socks5Url
 	socksURL, err := url.Parse(socks5Addr)
 	if err != nil {
 		return fmt.Errorf("invalid socks5 url: %w", err)

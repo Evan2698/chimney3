@@ -1,7 +1,9 @@
 package socks5
 
 import (
+	"chimney3/core"
 	"chimney3/settings"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -40,6 +42,10 @@ func startSocks5Client(s *settings.Settings) error {
 	}
 	log.Println("SOCKS5 client starting...")
 	server := NewSocks5Server(ss, nil)
-	go Run2HTTP(s)
+
+	httpAddr := s.Client.Httpurl
+	socks5Url := fmt.Sprintf("socks5://%s:%d", s.Client.IP, s.Client.Port)
+	log.Printf("Starting HTTP to SOCKS5 proxy on %s forwarding to %s", httpAddr, socks5Url)
+	go core.Run2HTTP(httpAddr, socks5Url)
 	return server.Serve()
 }
