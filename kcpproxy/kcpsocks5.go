@@ -1,6 +1,7 @@
 package kcpproxy
 
 import (
+	"chimney3/core"
 	"chimney3/settings"
 	"encoding/binary"
 	"fmt"
@@ -14,6 +15,12 @@ import (
 )
 
 func runKCPClient(s settings.Settings) error {
+
+	httpAddr := s.Client.Httpurl
+	socks5Url := fmt.Sprintf("socks5://%s:%d", s.Client.IP, s.Client.Port)
+	log.Printf("Starting HTTP to SOCKS5 proxy on %s forwarding to %s", httpAddr, socks5Url)
+	go core.Run2HTTP(httpAddr, socks5Url)
+
 	listenAddress := net.JoinHostPort(s.Client.IP, strconv.Itoa(s.Client.Port))
 
 	l, err := net.Listen("tcp", listenAddress)
