@@ -14,7 +14,7 @@
 		"user": "where",
 		"password": "Evan$%#@!#$@!123",
 		"udpport": 59,
-		"httpurl": ":::8000"
+		"httpurl": ":4000"
 	
 	},
 	"which": "kcp"
