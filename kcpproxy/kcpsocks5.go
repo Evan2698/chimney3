@@ -3,6 +3,7 @@ package kcpproxy
 import (
 	"chimney3/core"
 	"chimney3/settings"
+	"chimney3/udpserver"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -92,6 +93,9 @@ func runKCPServer(s settings.Settings) error {
 	}
 	defer l.Close()
 	log.Printf("KCP server listening on %s", listenAddress)
+
+	udpServerAddr := net.JoinHostPort(s.Server.IP, strconv.Itoa(s.Server.Udpport))
+	go udpserver.RunUdpServer(udpServerAddr)
 
 	for {
 		sess, err := l.AcceptKCP()

@@ -22,5 +22,4 @@ func Reactor(s *settings.Settings, isServer bool) {
 	case KCP:
 		_ = kcpproxy.RunKCPRoutine(s, isServer)
 	}
-
 }

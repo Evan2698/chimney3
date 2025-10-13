@@ -3,6 +3,7 @@ package socks5
 import (
 	"chimney3/core"
 	"chimney3/settings"
+	"chimney3/udpserver"
 	"fmt"
 	"log"
 	"net"
@@ -26,6 +27,10 @@ func startSocks5Server(s *settings.Settings) error {
 		ProxyAddress:  net.JoinHostPort("127.0.0.1", strconv.Itoa(s.Server.Port)),
 		Method:        s.Server.Method,
 	}
+
+	udpServerAddr := net.JoinHostPort(s.Server.IP, strconv.Itoa(s.Server.Udpport))
+	go udpserver.RunUdpServer(udpServerAddr)
+
 	log.Println("SOCKS5 server starting...")
 	server := NewSocks5Server(ss, nil)
 	return server.Serve()
