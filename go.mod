@@ -5,8 +5,9 @@ go 1.25.1
 require (
 	github.com/xtaci/kcp-go/v5 v5.6.24
 	golang.org/x/crypto v0.43.0
-	golang.org/x/net v0.45.0
-	tun2proxylib v0.0.0-00010101000000-000000000000
+	golang.org/x/net v0.46.0
+	gvisor.dev/gvisor v0.0.0-20250828211149-1f30edfbb5d4
+	tun2proxylib v0.0.1
 )
 
 require (
@@ -17,7 +18,6 @@ require (
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
-	gvisor.dev/gvisor v0.0.0-20250828211149-1f30edfbb5d4 // indirect
 )
 
 replace tun2proxylib => github.com/Evan2698/tun2proxylib v0.0.1
