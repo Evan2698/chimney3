@@ -7,13 +7,17 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )
 
+type Protect interface {
+	mobile.ProtectSocket
+}
+
 type Chimney struct {
 	Fd          int
-	Pfun        mobile.ProtectSocket
+	Pfun        Protect
 	User        string
 	Pass        string
 	TcpProxyUrl string
-	MTU         uint32
+	MTU         int
 	UdpProxyUrl string
 }
 
@@ -26,7 +30,7 @@ func StartChimney(c *Chimney) error {
 
 	var err error
 	client = buildVpnClient("127.0.0.1:1080", c.TcpProxyUrl, c.User, c.Pass, c.Pfun)
-	netstack, err = buildNetstackVpnClient(c.Fd, c.MTU, "127.0.0.1:1080", c.UdpProxyUrl)
+	netstack, err = buildNetstackVpnClient(c.Fd, (uint32)(c.MTU), "127.0.0.1:1080", c.UdpProxyUrl)
 	if err != nil {
 		return err
 	}
