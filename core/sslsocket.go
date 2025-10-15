@@ -2,9 +2,9 @@ package core
 
 import (
 	"bytes"
-	"chimney3/mem"
-	"chimney3/privacy"
-	"chimney3/utils"
+	"chimney3-go/mem"
+	"chimney3-go/privacy"
+	"chimney3-go/utils"
 	"errors"
 	"log"
 	"net"

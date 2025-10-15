@@ -1,8 +1,8 @@
 package proxy
 
 import (
-	"chimney3/core"
-	"chimney3/privacy"
+	"chimney3-go/core"
+	"chimney3-go/privacy"
 	"crypto/tls"
 	"io"
 	"log"

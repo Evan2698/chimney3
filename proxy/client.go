@@ -1,9 +1,9 @@
 package proxy
 
 import (
-	"chimney3/core"
-	"chimney3/mem"
-	"chimney3/privacy"
+	"chimney3-go/core"
+	"chimney3-go/mem"
+	"chimney3-go/privacy"
 	"log"
 	"net"
 	"sync"

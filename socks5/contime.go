@@ -1,7 +1,7 @@
 package socks5
 
 import (
-	"chimney3/core"
+	"chimney3-go/core"
 	"net"
 )
 

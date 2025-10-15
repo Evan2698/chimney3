@@ -1,7 +1,7 @@
 package core
 
 import (
-	"chimney3/utils"
+	"chimney3-go/utils"
 	"errors"
 	"log"
 	"net"

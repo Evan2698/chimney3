@@ -1,10 +1,10 @@
 package all
 
 import (
-	"chimney3/kcpproxy"
-	"chimney3/proxy"
-	"chimney3/settings"
-	"chimney3/socks5"
+	"chimney3-go/kcpproxy"
+	"chimney3-go/proxy"
+	"chimney3-go/settings"
+	"chimney3-go/socks5"
 )
 
 var (

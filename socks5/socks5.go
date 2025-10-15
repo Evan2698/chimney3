@@ -1,9 +1,9 @@
 package socks5
 
 import (
-	"chimney3/core"
-	"chimney3/settings"
-	"chimney3/udpserver"
+	"chimney3-go/core"
+	"chimney3-go/settings"
+	"chimney3-go/udpserver"
 	"fmt"
 	"log"
 	"net"

@@ -2,10 +2,10 @@ package socks5
 
 import (
 	"bytes"
-	"chimney3/core"
-	"chimney3/mem"
-	"chimney3/mobile"
-	"chimney3/privacy"
+	"chimney3-go/core"
+	"chimney3-go/mem"
+	"chimney3-go/mobile"
+	"chimney3-go/privacy"
 	"errors"
 	"io"
 	"log"

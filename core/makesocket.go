@@ -1,7 +1,7 @@
 package core
 
 import (
-	"chimney3/mobile"
+	"chimney3-go/mobile"
 	"errors"
 	"log"
 	"net"

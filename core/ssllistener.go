@@ -1,7 +1,7 @@
 package core
 
 import (
-	"chimney3/privacy"
+	"chimney3-go/privacy"
 	"log"
 	"net"
 )

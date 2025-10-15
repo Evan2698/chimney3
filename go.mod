@@ -1,4 +1,4 @@
-module chimney3
+module chimney3-go
 
 go 1.25.1
 

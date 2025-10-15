@@ -1,7 +1,7 @@
 package privacy
 
 import (
-	"chimney3/utils"
+	"chimney3-go/utils"
 	"crypto/hmac"
 	"crypto/sha256"
 	"errors"

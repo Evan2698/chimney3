@@ -2,7 +2,7 @@ package core
 
 import (
 	"bytes"
-	"chimney3/privacy"
+	"chimney3-go/privacy"
 	"net"
 	"testing"
 	"time"

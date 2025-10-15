@@ -2,7 +2,7 @@ package privacy
 
 import (
 	"bytes"
-	"chimney3/utils"
+	"chimney3-go/utils"
 
 	"crypto/aes"
 	"crypto/cipher"

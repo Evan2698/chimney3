@@ -2,8 +2,8 @@ package privacy
 
 import (
 	"bytes"
-	"chimney3/privacy/chacha20"
-	"chimney3/utils"
+	"chimney3-go/privacy/chacha20"
+	"chimney3-go/utils"
 	"crypto/rand"
 	"errors"
 	"io"

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"chimney3/all"
-	"chimney3/settings"
-	"chimney3/utils"
+	"chimney3-go/all"
+	"chimney3-go/settings"
+	"chimney3-go/utils"
 	"flag"
 	"fmt"
 	"os"

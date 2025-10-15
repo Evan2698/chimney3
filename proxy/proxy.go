@@ -1,8 +1,8 @@
 package proxy
 
 import (
-	"chimney3/settings"
-	"chimney3/udpserver"
+	"chimney3-go/settings"
+	"chimney3-go/udpserver"
 	"net"
 	"strconv"
 )
