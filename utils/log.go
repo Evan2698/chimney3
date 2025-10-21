@@ -36,5 +36,5 @@ func setlogglobal() io.Writer {
 
 func init() {
 	log.SetFlags(log.Ldate | log.Lmicroseconds | log.Llongfile)
-	log.SetOutput(setHighSpeed())
+	log.SetOutput(setlogglobal())
 }
