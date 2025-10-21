@@ -13,6 +13,6 @@ const (
 )
 
 const (
-	MAX_TIME_OUT  uint32 = 600
+	MAX_TIME_OUT  uint32 = 180
 	BUFFER_OFFSET int    = 16
 )
