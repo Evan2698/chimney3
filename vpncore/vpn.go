@@ -35,13 +35,13 @@ func stopVpnClient(s socks5.Socks5Server) {
 	s.Stop()
 }
 
-func buildNetstackVpnClient(fd int, mtu uint32, tcpUrl string, udpUrl string) (*stack.Stack, error) {
+func buildNetstackVpnClient(fd int, mtu uint32, tcpUrl string, udpUrl string, p mobile.ProtectSocket) (*stack.Stack, error) {
 	linker, err := gvisorcore.CreateLinkEndpoint(fd, mtu)
 	if err != nil {
 		log.Printf("Failed to create link endpoint: %v", err)
 		return nil, err
 	}
-	handler := proxy.NewDefaultProxy(tcpUrl, udpUrl)
+	handler := proxy.NewDefaultProxy(tcpUrl, udpUrl, p)
 	options := gvisorcore.StackOptions{
 		TransportHandler: handler,
 		LinkEndpoint:     linker,

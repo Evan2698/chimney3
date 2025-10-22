@@ -31,7 +31,7 @@ func StartChimney(c *Chimney) error {
 
 	var err error
 	client = buildVpnClient("127.0.0.1:1080", c.TcpProxyUrl, c.User, c.Pass, c.Pfun)
-	netstack, err = buildNetstackVpnClient(c.Fd, uint32(c.MTU), "127.0.0.1:1080", c.UdpProxyUrl)
+	netstack, err = buildNetstackVpnClient(c.Fd, uint32(c.MTU), "127.0.0.1:1080", c.UdpProxyUrl, c.Pfun)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ require (
 	golang.org/x/crypto v0.43.0
 	golang.org/x/net v0.46.0
 	gvisor.dev/gvisor v0.0.0-20250828211149-1f30edfbb5d4
-	tun2proxylib v0.0.3
+	tun2proxylib v0.0.4
 )
 
 require (
@@ -20,4 +20,4 @@ require (
 	golang.org/x/time v0.12.0 // indirect
 )
 
-replace tun2proxylib => github.com/Evan2698/tun2proxylib v0.0.3
+replace tun2proxylib => github.com/Evan2698/tun2proxylib v0.0.4
