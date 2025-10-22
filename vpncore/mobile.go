@@ -1,8 +1,9 @@
 package vpncore
 
 import (
-	"chimney3-go/mobile"
 	"chimney3-go/socks5"
+
+	"tun2proxylib/mobile"
 
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )

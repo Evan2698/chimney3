@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"chimney3-go/core"
 	"chimney3-go/mem"
-	"chimney3-go/mobile"
 	"chimney3-go/privacy"
 	"chimney3-go/utils"
 	"errors"
 	"log"
 	"net"
 	"sync"
+	"tun2proxylib/mobile"
 )
 
 type Socks5Server interface {

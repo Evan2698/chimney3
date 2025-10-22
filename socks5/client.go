@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"chimney3-go/core"
 	"chimney3-go/mem"
-	"chimney3-go/mobile"
 	"chimney3-go/privacy"
 	"errors"
 	"io"
 	"log"
 	"net"
+	"tun2proxylib/mobile"
+	"tun2proxylib/socketbase"
 )
 
 type ClientSettings struct {
@@ -229,11 +230,5 @@ func (c *Socks5) connectTarget(con net.Conn, addr *core.Socks5Address, key []byt
 
 func (c *Socks5) buildClientSocket() (con net.Conn, err error) {
 	host := c.Settings.ProxyAddress
-	if c.Protect != nil {
-		con, err = core.CreateSocket(host, core.TCP_SOCKET, c.Protect)
-	} else {
-		con, err = net.Dial("tcp", host)
-	}
-
-	return con, err
+	return socketbase.TcpDailNetString(host, c.Protect)
 }
