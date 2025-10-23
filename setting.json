@@ -3,7 +3,7 @@
 		"ip": "12.12.12.124",
 		"port": 9001,
 		"user": "where",
-		"password": "123456789",
+		"password": "N4gzAraHGgt6EshGZtv2",
 		"method": "CHACHA-20",
 		"udpport": 9002
 
@@ -12,7 +12,7 @@
 		"ip": "127.0.0.1",
 		"port": 9999,
 		"user": "where",
-		"password": "123456789",
+		"password": "N4gzAraHGgt6EshGZtv2",
 		"udpport": 59,
 		"httpurl": ":4000"
 	
