@@ -111,6 +111,12 @@ func runKCPServer(s settings.Settings) error {
 
 // handleKCPServerSession handles an incoming KCP session by echoing data back to the client.
 func handleKCPServerSession(conn *kcp.UDPSession) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(" fatal error on udp server: ", err)
+		}
+	}()
+
 	defer conn.Close()
 	// 1. 握手阶段
 	buf := make([]byte, 258)

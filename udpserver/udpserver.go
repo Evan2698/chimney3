@@ -13,6 +13,11 @@ var (
 )
 
 func RunUdpServer(udpURl string) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(" fatal error on udp server: ", err)
+		}
+	}()
 	if udpURl == "" {
 		udpURl = "0.0.0.0:5353"
 	}
@@ -52,6 +57,11 @@ func RunUdpServer(udpURl string) {
 }
 
 func captureRemote(target, local, src *net.UDPAddr, payload []byte, conn *net.UDPConn) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(" fatal error on udp server: ", err)
+		}
+	}()
 
 	remoteConn, err := net.DialUDP("udp", nil, target)
 	if err != nil {

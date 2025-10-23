@@ -97,6 +97,11 @@ func (s *Socks5S) Stop() {
 }
 
 func (s *Socks5S) serveOn(session *socks5session) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(" fatal error on udp server: ", err)
+		}
+	}()
 	// Implement the serveOn method here
 	defer session.Close()
 	// Add your handling code here

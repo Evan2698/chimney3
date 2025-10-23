@@ -49,6 +49,11 @@ func (p *proxyServer) Serve() {
 }
 
 func handleTunneling(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(" fatal error on udp server: ", err)
+		}
+	}()
 	dest_conn, err := net.DialTimeout("tcp", r.Host, 10*time.Second)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
