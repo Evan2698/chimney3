@@ -1,4 +1,4 @@
-#Chimney3-go
+# Chimney3-go
 
 这是一个科学上网项目，已经迭代到第三代，支持TCP, UDP, KCP，quic 等协议。
 chimney3 将服务端和客户端都集成在一个可执行程序中
